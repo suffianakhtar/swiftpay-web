@@ -1,0 +1,18 @@
+import { Outlet } from 'react-router-dom';
+import { Sidebar } from './Sidebar';
+import { TopBar } from './TopBar';
+
+/** Two-column app shell: sidebar + (topbar + scrollable page). */
+export function AppShell() {
+  return (
+    <div className="grid h-screen grid-cols-[232px_1fr] bg-bg">
+      <Sidebar />
+      <div className="flex min-w-0 flex-col">
+        <TopBar />
+        <main className="flex-1 overflow-y-auto">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
+}

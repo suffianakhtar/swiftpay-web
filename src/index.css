@@ -1,0 +1,144 @@
+/* SwiftPay — Tailwind v4 + design tokens
+   Tailwind v4 reads CSS variables via @theme inline. Dark/light themes swap
+   the values; the accent is a single live variable so Tweaks/theme picker
+   can swap it at runtime. */
+@import "tailwindcss";
+
+/* Bring our custom tokens into Tailwind's theme.
+   They become utility classes like `bg-bg`, `text-text-2`, `border-border`,
+   `bg-accent`, etc. */
+@theme inline {
+  --color-bg:        var(--c-bg);
+  --color-surface:   var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-surface-3: var(--c-surface-3);
+
+  --color-text:    var(--c-text);
+  --color-text-2:  var(--c-text-2);
+  --color-text-3:  var(--c-text-3);
+
+  --color-border:    var(--c-border);
+  --color-border-2:  var(--c-border-2);
+
+  --color-accent:    var(--c-accent);
+  --color-accent-hi: var(--c-accent-hi);
+  --color-accent-fg: var(--c-accent-fg);
+
+  --color-success:   var(--c-success);
+  --color-success-2: var(--c-success-2);
+  --color-warn:      var(--c-warn);
+  --color-warn-2:    var(--c-warn-2);
+  --color-danger:    var(--c-danger);
+  --color-danger-2:  var(--c-danger-2);
+  --color-info-2:    var(--c-info-2);
+
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+
+  --radius-sm: 6px;
+  --radius:    8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+}
+
+/* Dark theme (default) */
+:root,
+:root[data-theme="dark"] {
+  --c-bg:        #0a0d12;
+  --c-surface:   #11151b;
+  --c-surface-2: #181d25;
+  --c-surface-3: #1f252e;
+
+  --c-text:    #e8ebf0;
+  --c-text-2:  #a4adba;
+  --c-text-3:  #6a7280;
+
+  --c-border:   #232932;
+  --c-border-2: #2d343f;
+
+  --c-accent:    #0ea5e9;
+  --c-accent-hi: #38bdf8;
+  --c-accent-fg: #ffffff;
+
+  --c-success:   #22c55e;
+  --c-success-2: rgba(34, 197, 94, 0.14);
+  --c-warn:      #f59e0b;
+  --c-warn-2:    rgba(245, 158, 11, 0.14);
+  --c-danger:    #ef4444;
+  --c-danger-2:  rgba(239, 68, 68, 0.14);
+  --c-info-2:    rgba(14, 165, 233, 0.14);
+
+  --shadow:    0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 12px 36px rgba(0, 0, 0, 0.45);
+  --shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 1px 2px rgba(0, 0, 0, 0.3);
+  --ring:      0 0 0 4px color-mix(in oklab, var(--c-accent) 22%, transparent);
+}
+
+:root[data-theme="light"] {
+  --c-bg:        #f4f5f7;
+  --c-surface:   #ffffff;
+  --c-surface-2: #fafbfc;
+  --c-surface-3: #f1f3f6;
+
+  --c-text:    #0b1220;
+  --c-text-2:  #4b5563;
+  --c-text-3:  #9ca3af;
+
+  --c-border:   #e6e8ec;
+  --c-border-2: #d6d9df;
+
+  --c-accent:    #0284c7;
+  --c-accent-hi: #0ea5e9;
+  --c-accent-fg: #ffffff;
+
+  --c-success:   #16a34a;
+  --c-success-2: rgba(22, 163, 74, 0.10);
+  --c-warn:      #d97706;
+  --c-warn-2:    rgba(217, 119, 6, 0.10);
+  --c-danger:    #dc2626;
+  --c-danger-2:  rgba(220, 38, 38, 0.10);
+  --c-info-2:    rgba(2, 132, 199, 0.10);
+
+  --shadow:    0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 36px rgba(15, 23, 42, 0.06);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --ring:      0 0 0 4px color-mix(in oklab, var(--c-accent) 18%, transparent);
+}
+
+/* Base resets / nice-to-haves */
+html, body, #root { height: 100%; }
+body {
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01", "ss03";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tabular numerals on everything that looks like money/IDs */
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* Custom scrollbar */
+*::-webkit-scrollbar         { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track   { background: transparent; }
+*::-webkit-scrollbar-thumb   { background: var(--c-border-2); border-radius: 5px; }
+*::-webkit-scrollbar-thumb:hover { background: var(--c-text-3); }
+* { scrollbar-color: var(--c-border-2) transparent; scrollbar-width: thin; }
+
+/* Tiny animations used in spinners + entrance fades */
+@keyframes spin    { to { transform: rotate(360deg); } }
+@keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 color-mix(in oklab, var(--c-accent) 50%, transparent); }
+  100% { box-shadow: 0 0 0 14px transparent; }
+}
+
+@utility animate-spin     { animation: spin 0.7s linear infinite; }
+@utility animate-fade-in  { animation: fade-in 0.25s ease-out; }
+@utility animate-pulse-ring { animation: pulse-ring 1.2s ease-out infinite; }
+
+/* Focus ring on interactive elements */
+@layer base {
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--radius-sm);
+  }
+}

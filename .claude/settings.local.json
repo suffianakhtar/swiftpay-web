@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"D:\\\\Work\\\\SwiftPay\\\\Resources\\\\UI\" -Recurse -Force | Select-Object FullName, @{Name=\"Type\"; Expression={if \\($_.PSIsContainer\\) { \"DIR\" } else { \"FILE\" }}} | Sort-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"D:\\\\Work\\\\SwiftPay\\\\swiftpay-web\" -Recurse -Force | Select-Object FullName | ForEach-Object { $_.FullName -replace [regex]::Escape\\(\"D:\\\\Work\\\\SwiftPay\\\\swiftpay-web\"\\), \".\" } | Sort-Object)",
+      "Bash(npm run *)",
+      "Bash(npx tsc *)"
+    ]
+  }
+}

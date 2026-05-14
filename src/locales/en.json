@@ -1,0 +1,57 @@
+{
+  "app": {
+    "name": "SwiftPay",
+    "tagline": "Move money on Raast — without leaving your desk."
+  },
+  "nav": {
+    "overview": "Overview",
+    "requests": "Requests",
+    "settlements": "Settlements",
+    "aliases": "Aliases",
+    "accounts": "Bank accounts",
+    "settings": "Settings",
+    "audit": "Audit log",
+    "system": "System health",
+    "clients": "API clients"
+  },
+  "auth": {
+    "signIn": "Sign in to SwiftPay",
+    "email": "Email",
+    "password": "Password",
+    "forgot": "Forgot?",
+    "continue": "Continue",
+    "keepSignedIn": "Keep me signed in on this device",
+    "requestAccess": "Request access",
+    "noAccount": "New to SwiftPay?"
+  },
+  "rtp": {
+    "new": "New request",
+    "amount": "Amount",
+    "recipient": "Recipient",
+    "review": "Review",
+    "send": "Send",
+    "cancel": "Cancel request",
+    "status": {
+      "PENDING": "Pending",
+      "ACCEPTED": "Accepted",
+      "REJECTED": "Rejected",
+      "EXPIRED": "Expired",
+      "CANCELLED": "Cancelled",
+      "INITIATED": "Initiated"
+    }
+  },
+  "common": {
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "save": "Save",
+    "delete": "Delete",
+    "copy": "Copy",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "loading": "Loading…",
+    "empty": "Nothing here yet."
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "app": {
+    "name": "SwiftPay",
+    "tagline": ""
+  },
+  "nav": {
+    "overview": "",
+    "requests": "",
+    "settlements": "",
+    "aliases": "",
+    "accounts": "",
+    "settings": "",
+    "audit": "",
+    "system": "",
+    "clients": ""
+  },
+  "auth": {
+    "signIn": "",
+    "email": "",
+    "password": "",
+    "forgot": "",
+    "continue": "",
+    "keepSignedIn": "",
+    "requestAccess": "",
+    "noAccount": ""
+  },
+  "rtp": {
+    "new": "",
+    "amount": "",
+    "recipient": "",
+    "review": "",
+    "send": "",
+    "cancel": "",
+    "status": {
+      "PENDING": "",
+      "ACCEPTED": "",
+      "REJECTED": "",
+      "EXPIRED": "",
+      "CANCELLED": "",
+      "INITIATED": ""
+    }
+  },
+  "common": {
+    "search": "",
+    "filter": "",
+    "export": "",
+    "save": "",
+    "delete": "",
+    "copy": "",
+    "close": "",
+    "back": "",
+    "next": "",
+    "done": "",
+    "loading": "",
+    "empty": ""
+  }
+}
