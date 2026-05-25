@@ -4,8 +4,8 @@
 export type AliasType   = 'MOBILE' | 'IBAN';
 export type PartyType   = 'MERCHANT' | 'AGGREGATOR';
 export type RtpType     = 'NOW' | 'LATER';
-export type RtpStatus   = 'INITIATED' | 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
-export type LookupStatus= 'RESOLVED' | 'UNRESOLVED' | 'EXPIRED';
+export type RtpStatus   = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'EXPIRED' | 'CANCELLED';
+export type LookupStatus= 'RESOLVED' | 'NOT_FOUND' | 'FAILED';
 
 /* ============ Auth ============ */
 export interface TokenRequest {
@@ -23,7 +23,7 @@ export interface TokenResponse {
 /* ============ Alias lookup ============ */
 export interface AliasLookupRequest {
   aliasType: AliasType;
-  aliasValue: string;
+  alias: string;
   channel: string;
 }
 
@@ -60,26 +60,31 @@ export interface CreateRtpResponse {
 }
 
 export interface StatusInquiryResponse {
+  paymentRequestId: string;
   rtpId: string;
   status: RtpStatus;
   responseCode: string;
   responseDescription: string;
+  correlationId: string;
 }
 
 export interface CancelRtpResponse {
+  paymentRequestId: string;
   rtpId: string;
   status: RtpStatus;
   responseCode: string;
   responseDescription: string;
+  correlationId: string;
 }
 
 /* ============ Generic ============ */
 export interface ApiErrorBody {
+  timestamp: string;
   status: number;
-  code: string;
+  error: string;
   message: string;
   correlationId?: string;
-  fieldErrors?: Record<string, string>;
+  violations?: Array<{ field: string; message: string }>;
 }
 
 /* ============ UI-only domain types ============ */

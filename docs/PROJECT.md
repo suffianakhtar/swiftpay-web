@@ -64,8 +64,9 @@ D:\Work\SwiftPay\
 | Framework | React | 18.3.1 |
 | Language | TypeScript | 5.7 |
 | Build | Vite | 6.1 |
-| Styling | Tailwind CSS | 4.0.6 (CSS vars) |
+| Styling | Tailwind CSS | 4.0.6 — uses `@tailwindcss/vite` plugin, **not** classic `tailwind.config.js` |
 | Components | Radix UI | dialog, tabs, switch, dropdown-menu, etc. |
+| Class utilities | CVA + clsx + tailwind-merge | 0.7.1 / 2.1.1 / 3.0.1 — exported as `cn()` from `src/lib/utils.ts` |
 | Forms | React Hook Form + Zod | 7.54 |
 | Server state | TanStack Query | 5.66 |
 | HTTP client | Axios | 1.7.9 |
@@ -138,6 +139,7 @@ src/
 | `/login` | LoginPage | Public |
 | `/` | DashboardPage | RequireAuth |
 | `/requests` | RequestsPage | RequireAuth |
+| `/requests/:rtpId` | RequestsPage (DetailDrawer open) | RequireAuth |
 | `/settlements` | SettlementsPage | RequireAuth |
 | `/aliases` | AliasesPage | RequireAuth |
 | `/accounts` | BankAccountsPage | RequireAuth |
@@ -151,16 +153,17 @@ All protected routes are lazy-loaded and wrapped in `RequireAuth`.
 ### 3.4 Authentication Flow
 
 1. User submits email + password → `POST /api/v1/auth/token`
-2. JWT stored in `localStorage` via `lib/auth.ts`
+2. JWT stored in `localStorage` under key `swiftpay_token` via `lib/auth.ts`
 3. Axios request interceptor injects `Authorization: Bearer <token>` + `X-Correlation-Id` (UUID) + `Idempotency-Key`
 4. Response interceptor: 401 → clear session + redirect to `/login`, 503 → show upstream error
 5. `isSessionLive()` checks JWT expiry with a 30-second buffer
+6. Route guards: `<RequireAuth>` for all authenticated routes; `<RoleGate allow="admin">` for admin-only routes
 
 ### 3.5 Data Fetching
 
 - TanStack Query: `staleTime: 30s`, `gcTime: 5min`
 - Retry: skip 4xx errors, retry 5xx/network errors up to 2 times
-- Dev mode: mock data from `mock/data.ts` (toggle in `features/requests/api.ts`)
+- Dev mode: mock data from `mock/data.ts`; toggled by `const USE_REAL_API = env.isProd` in `features/requests/api.ts`
 - Mutations call `queryClient.invalidateQueries()` on success
 
 ### 3.6 Theming
@@ -182,6 +185,14 @@ All protected routes are lazy-loaded and wrapped in `RequireAuth`.
 **DetailDrawer** — 440px right panel:
 - Polls `POST /api/v1/rtp/{id}/status` every 8s while status is `PENDING`
 - Cancel flow triggers confirmation dialog → `POST /api/v1/rtp/{id}/cancel`
+
+### 3.8 Vite Build
+
+Manual chunk splitting for optimal long-term caching:
+- `react-vendor` — React, React DOM, React Router
+- `query-vendor` — TanStack Query
+- `chart-vendor` — Recharts
+- `radix-vendor` — Radix UI primitives
 
 ---
 
@@ -380,25 +391,22 @@ Response: { "requestId": "...", "status": "CANCELLED", ... }
 
 **Sandbox base URL:** `https://sandboxapi.1link.net.pk/uat-1link/sandbox/1Link`
 
-### Implemented Endpoints (9/12)
+### Implemented Endpoints (12/12)
 
 | Endpoint | Purpose |
 |---|---|
 | `/preRTPAliasInquiry` | Resolve mobile alias (generic) |
 | `/preRTPAliasInquiryAggregator` | Resolve mobile alias (aggregator) |
-| `/preRTPTitleFetch` | Fetch IBAN account title |
+| `/preRTPAliasInquiryMerchant` | Resolve mobile alias (merchant, with profile fields) |
+| `/preRTPTitleFetch` | Fetch IBAN account title (generic) |
+| `/preRTPTitleFetchAggregator` | Fetch IBAN account title (aggregator) |
+| `/preRTPTitleFetchMerchant` | Fetch IBAN account title (merchant) |
 | `/rtpNowMerchant` | Immediate RTP — merchant party |
 | `/rtpLaterMerchant` | Scheduled RTP — merchant party |
 | `/rtpNowAggregator` | Immediate RTP — aggregator party |
 | `/rtpLaterAggregator` | Scheduled RTP — aggregator party |
 | `/statusInquiry` | Poll RTP status |
 | `/rtpCancellation` | Cancel pending RTP |
-
-### Missing Endpoints (3/12)
-
-- `/preRTPAliasInquiryMerchant` — merchant alias with full profile
-- `/preRTPTitleFetchAggregator` — IBAN title fetch for aggregator
-- `/preRTPTitleFetchMerchant` — IBAN title fetch for merchant
 
 ### Auth (per request)
 
@@ -453,30 +461,24 @@ Response: { "requestId": "...", "status": "CANCELLED", ... }
 
 ## 9. Feature Pages
 
-| Page | Route | Role | Description |
-|---|---|---|---|
-| Login | `/login` | Public | Email + password, JWT flow |
-| Dashboard (User) | `/` | User | Stats, quick-send tiles, sparklines, recent requests |
-| Dashboard (Admin) | `/` | Admin | System health pulse, event stream |
-| Requests | `/requests` | User | Filterable RTP list, create wizard, detail drawer |
-| Settlements | `/settlements` | User | Daily settlement runs, in-transit/settled amounts |
-| Aliases | `/aliases` | User | Registered Raast aliases (mobile + IBAN), QR placeholder |
-| Bank Accounts | `/accounts` | User | Linked settlement IBANs, verification status |
-| Settings | `/settings/*` | User | Profile, API keys, webhooks, 2FA/JWT, notifications |
-| System Health | `/system` | Admin | P50/P95/error-rate sparklines, 1LINK endpoint matrix |
-| API Clients | `/clients` | Admin | OAuth2 clients, tier, TPS, last-seen |
-| Audit Log | `/audit` | Admin | Searchable activity table with correlation IDs |
-
-### Screens Not Yet Built (from design)
-
-| Screen | Notes |
-|---|---|
-| Onboarding | First-run KYC → bank → alias flow |
-| Notifications inbox | Bell-anchored panel with filter + mark-all-read |
-| Command palette | ⌘K — grouped actions/pages/recent |
-| Empty states | Zero-row request list |
-| Error state | 503 / circuit breaker open |
-| Mobile breakpoint | Responsive layout (React Native baseline) |
+| Page | Route | Role | Status | Description |
+|---|---|---|---|---|
+| Login | `/login` | Public | Implemented | Email + password, JWT flow |
+| Dashboard (User) | `/` | User | Implemented | Stats, quick-send tiles, sparklines, recent requests |
+| Dashboard (Admin) | `/` | Admin | Implemented | System health pulse, event stream |
+| Requests | `/requests` | User | Implemented | Filterable RTP list, create wizard, detail drawer |
+| Settlements | `/settlements` | User | Mock data | Daily settlement runs, in-transit/settled amounts |
+| Aliases | `/aliases` | User | Mock data | Registered Raast aliases (mobile + IBAN), QR placeholder |
+| Bank Accounts | `/accounts` | User | Mock data | Linked settlement IBANs, verification status |
+| Settings | `/settings/*` | User | Mock data | Profile, API keys, webhooks, 2FA/JWT, notifications |
+| System Health | `/system` | Admin | Mock data | P50/P95/error-rate sparklines, 1LINK endpoint matrix |
+| API Clients | `/clients` | Admin | Mock data | OAuth2 clients, tier, TPS, last-seen |
+| Audit Log | `/audit` | Admin | Mock data | Searchable activity table with correlation IDs |
+| Onboarding | — | User | Not built | First-run KYC → bank → alias flow |
+| Notifications inbox | — | User | Not built | Bell-anchored panel with filter + mark-all-read |
+| Command palette | — | User | Not built | ⌘K — grouped actions/pages/recent |
+| Empty / error states | — | All | Not built | Zero-row list, 503 / circuit breaker open |
+| Mobile layout | — | All | Not built | Responsive breakpoints (layouts currently assume desktop) |
 
 ---
 
@@ -490,35 +492,39 @@ Located at `D:\Work\SwiftPay\Resources\UI\`:
 
 ### CSS Design Tokens (`src/index.css`)
 
+Dark theme (default) values:
+
+| Token | Value | Role |
+|---|---|---|
+| `--c-bg` | `#0a0d12` | Page background |
+| `--c-surface` | `#11151b` | Card background |
+| `--c-surface-2` | `#181d25` | Elevated surface |
+| `--c-surface-3` | `#1f252e` | Further elevation |
+| `--c-text` | `#e8ebf0` | Primary text |
+| `--c-text-2` | `#a4adba` | Secondary text |
+| `--c-text-3` | `#6a7280` | Tertiary / placeholder |
+| `--c-border` | `#232932` | Default border |
+| `--c-accent` | `#0ea5e9` | Live-swappable accent |
+| `--c-success / --c-warn / --c-danger` | — | Status colours |
+
+Tailwind v4 utilities map directly: `bg-bg`, `bg-surface`, `bg-surface-2`, `bg-surface-3`, `text-text`, `text-text-2`, `text-text-3`, `border-border`, `bg-accent`, `text-accent`.
+
 ```css
-/* Backgrounds */
---c-bg, --c-surface, --c-surface-2, --c-surface-3
-
-/* Text */
---c-text, --c-text-2, --c-text-3
-
-/* Borders */
---c-border, --c-border-2
-
-/* Accent (live-editable) */
---c-accent, --c-accent-hi, --c-accent-fg
-
-/* Status */
---c-success, --c-warn, --c-danger, --c-info-2
-
-/* Fonts */
-Geist (sans), Geist Mono, system fallbacks
-
-/* Radii */
-6px (sm), 8px (base), 12px (lg), 16px (xl)
-
-/* Animations */
-spin (0.7s), fade-in (0.25s), pulse-ring (1.2s)
+/* Fonts */   Geist (sans), Geist Mono (IDs, IBANs, amounts, timestamps)
+/* Radii */   6px (sm), 8px (base), 12px (lg), 16px (xl)
+/* Animations */ spin (0.7s), fade-in (0.25s), pulse-ring (1.2s)
 ```
 
 ### Accent Color Presets
 
-`sky` | `green` | `purple` | `amber` | `rose` | `forest`
+| Name | Hex |
+|---|---|
+| sky (default) | `#0ea5e9` |
+| green | `#22c55e` |
+| purple | `#a855f7` |
+| amber | `#f59e0b` |
+| rose | `#ef4444` |
+| forest | `#0b5d3b` |
 
 ---
 
@@ -559,11 +565,15 @@ spin (0.7s), fade-in (0.25s), pulse-ring (1.2s)
 cd swiftpay-web
 npm install
 npm run dev          # http://localhost:5173
-npm run build        # Production build
-npm run lint         # ESLint check
+npm run build        # Type-check + production build → dist/
+npm run lint         # ESLint (zero warnings allowed)
+npm run type-check   # tsc --noEmit only
+npm run preview      # Serve dist/ locally
 ```
 
 Vite proxies `/api/v1/*` → `http://localhost:9771` in dev.
+
+**Dev login credentials:** `ayesha.khan@nessovo.com` / `developer-secret`
 
 ### Backend (Docker)
 
@@ -621,11 +631,10 @@ No test suite yet — dev/QA uses mock data mode.
 
 ### Backend
 
-- [ ] 3 missing 1LINK endpoints: `preRTPAliasInquiryMerchant`, `preRTPTitleFetchAggregator`, `preRTPTitleFetchMerchant`
+- [ ] `GET /api/v1/rtp` — RTP list/query endpoint with pagination (frontend `useRequests()` currently uses mock data; this is the most critical missing endpoint)
+- [ ] Endpoints for Settlements, Aliases list, Bank Accounts, Settings, System Health, API Clients, Audit Log — none of these management pages have any backend support yet
 - [ ] Rate limiting on public endpoints
 - [ ] Audit trail (DB table for all actions)
-- [ ] Pagination on RTP list endpoint (not yet implemented)
-- [ ] RTP list / query endpoint (frontend currently uses mock data)
 
 ### Frontend
 
@@ -634,10 +643,11 @@ No test suite yet — dev/QA uses mock data mode.
 - [ ] Command palette (⌘K)
 - [ ] Empty and error state screens
 - [ ] Mobile responsive layout
-- [ ] Real API integration for Settlements, Aliases, Bank Accounts, Settings, System Health, API Clients pages (currently showing static/mock data)
+- [ ] Real API integration for Settlements, Aliases, Bank Accounts, Settings, System Health, API Clients, Audit pages — blocked on backend endpoints above
+- [ ] Wire `useRequests()` to real `GET /api/v1/rtp` once backend builds it
 - [ ] Urdu translations (ur.json is WIP)
 - [ ] RTP list pagination
 
 ---
 
-*Last updated: 2026-05-14*
+*Last updated: 2026-05-19 — backend fully explored; all 12 1LINK endpoints confirmed implemented*

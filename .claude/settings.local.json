@@ -4,7 +4,16 @@
       "PowerShell(Get-ChildItem -Path \"D:\\\\Work\\\\SwiftPay\\\\Resources\\\\UI\" -Recurse -Force | Select-Object FullName, @{Name=\"Type\"; Expression={if \\($_.PSIsContainer\\) { \"DIR\" } else { \"FILE\" }}} | Sort-Object FullName)",
       "PowerShell(Get-ChildItem -Path \"D:\\\\Work\\\\SwiftPay\\\\swiftpay-web\" -Recurse -Force | Select-Object FullName | ForEach-Object { $_.FullName -replace [regex]::Escape\\(\"D:\\\\Work\\\\SwiftPay\\\\swiftpay-web\"\\), \".\" } | Sort-Object)",
       "Bash(npm run *)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(Get-ChildItem -Recurse -Force)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(grep -E \"\\\\.\\(tsx?|json|css|md\\)$\")",
+      "Bash(rm *)",
+      "PowerShell(cd \"D:\\\\Programming\\\\Java\\\\Projects\\\\swiftpay-payment-backend\"; Get-ChildItem -Recurse -Force | Select-Object FullName | ForEach-Object { $_.FullName })",
+      "Bash(timeout 5)",
+      "Bash(Start-Sleep -Seconds 5)",
+      "Bash(Get-Content \"C:\\\\Users\\\\SUFFIA~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\D--Programming-React-swiftpay-web\\\\7816770c-715b-4793-8565-87c75268a9b2\\\\tasks\\\\b0j3i3fg5.output\")",
+      "Bash(curl *)"
     ]
   }
 }

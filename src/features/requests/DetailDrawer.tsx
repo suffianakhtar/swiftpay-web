@@ -41,7 +41,7 @@ export function RequestDetailDrawer({ rtp, onOpenChange }: Props) {
     if (!rtp) return;
     setPollingFlash(true);
     try {
-      await statusInquiry.mutateAsync(rtp.id);
+      await statusInquiry.mutateAsync(rtp.paymentRequestId ?? rtp.id);
     } finally {
       setLastChecked(new Date());
       setTimeout(() => setPollingFlash(false), 400);
@@ -51,7 +51,7 @@ export function RequestDetailDrawer({ rtp, onOpenChange }: Props) {
   const onConfirmCancel = async () => {
     if (!rtp) return;
     try {
-      const res = await cancelMut.mutateAsync(rtp.id);
+      const res = await cancelMut.mutateAsync(rtp.paymentRequestId ?? rtp.id);
       setOptimisticStatus(res.status);
       toast.success('Request cancelled (responseCode 00)');
       setCancelOpen(false);

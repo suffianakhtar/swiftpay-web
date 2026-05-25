@@ -10,11 +10,12 @@ import { uuid } from './utils';
 
 /** Domain error shape returned by the SwiftPay Spring Boot service. */
 export interface ApiError {
+  timestamp: string;
   status: number;
-  code: string;
+  error: string;
   message: string;
   correlationId?: string;
-  fieldErrors?: Record<string, string>;
+  violations?: Array<{ field: string; message: string }>;
 }
 
 /** Convenience type for callers — the axios error narrowed to ApiError. */

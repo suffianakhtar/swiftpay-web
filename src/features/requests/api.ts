@@ -7,12 +7,11 @@ import type {
   RtpRow, StatusInquiryResponse,
 } from '@/types/api';
 import { MOCK_RTPS, makeFakeRtps, sleep } from '@/mock/data';
-import { env } from '@/lib/env';
 
 /** Toggle to point the hooks at the real backend.
  *  Default: false — uses MOCK data so the scaffold is usable without a running
  *  Spring Boot instance. Flip to true once your /api/v1 is reachable. */
-const USE_REAL_API = env.isProd; // dev = mock, prod = real
+const USE_REAL_API = true;
 
 /* ============ Queries ============ */
 
@@ -51,7 +50,7 @@ export function useResolveAlias() {
           correlationId: uuid(),
         };
       }
-      const body: AliasLookupRequest = { ...input, channel: 'WEB' };
+      const body: AliasLookupRequest = { aliasType: input.aliasType, alias: input.aliasValue, channel: 'WEB' };
       const { data } = await api.post<AliasLookupResponse>('/aliases/resolve', body);
       return data;
     },
@@ -89,12 +88,8 @@ export function useCreateRtp() {
 
 export function useStatusInquiry() {
   return useMutation<StatusInquiryResponse, Error, string>({
-    mutationFn: async (rtpId) => {
-      if (!USE_REAL_API) {
-        await sleep(1100);
-        return { rtpId, status: 'PENDING', responseCode: '00', responseDescription: 'Awaiting recipient' };
-      }
-      const { data } = await api.post<StatusInquiryResponse>(`/rtp/${rtpId}/status`);
+    mutationFn: async (paymentRequestId) => {
+      const { data } = await api.post<StatusInquiryResponse>(`/rtp/${paymentRequestId}/status`);
       return data;
     },
   });
@@ -103,12 +98,8 @@ export function useStatusInquiry() {
 export function useCancelRtp() {
   const qc = useQueryClient();
   return useMutation<CancelRtpResponse, Error, string>({
-    mutationFn: async (rtpId) => {
-      if (!USE_REAL_API) {
-        await sleep(1100);
-        return { rtpId, status: 'CANCELLED', responseCode: '00', responseDescription: 'Cancelled' };
-      }
-      const { data } = await api.post<CancelRtpResponse>(`/rtp/${rtpId}/cancel`);
+    mutationFn: async (paymentRequestId) => {
+      const { data } = await api.post<CancelRtpResponse>(`/rtp/${paymentRequestId}/cancel`);
       return data;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['rtps'] }),

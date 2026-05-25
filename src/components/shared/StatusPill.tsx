@@ -8,7 +8,6 @@ const TONE: Record<RtpStatus, React.ComponentProps<typeof Badge>['tone']> = {
   REJECTED:  'danger',
   EXPIRED:   'neutral',
   CANCELLED: 'neutral',
-  INITIATED: 'info',
 };
 
 /** Pill that renders an RtpStatus consistently across the app. */
